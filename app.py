@@ -1,12 +1,15 @@
 import os
 import pickle
-from PyPDF2 import PdfReader
 import streamlit as st
+from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from streamlit_extras.add_vertical_space import add_vertical_space
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
+from langchain.llms import OpenAI
+from langchain.chains.question_answering import load_qa_chain
+from langchain.callbacks import get_openai_callback
 
 # Sidebar contents
 with st.sidebar:
@@ -57,6 +60,23 @@ def main():
             VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
             with open(f"{store_name}.pkl", "wb") as f:
                 pickle.dump(VectorStore, f)
+            
+            st.write('Embeddings Computation Completed')
+
+        # Accept user questions/query
+
+        query = st.text_input("Ask questions about your PDF file:")
+        if query:
+            query += ' 한국어로 대답해줘.'
+            docs = VectorStore.similarity_search(query=query, k=3)
+
+            llm = OpenAI(model_name='gpt-3.5-turbo')
+            chain = load_qa_chain(llm=llm, chain_type='stuff')
+            with get_openai_callback() as cb:
+                response = chain.run(input_documents=docs, question=query)
+                print(cb)
+            st.write(response)
+
 
 
 
