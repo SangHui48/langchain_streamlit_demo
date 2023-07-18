@@ -115,11 +115,11 @@ def main():
                     # message(msg.content, is_user=True, key=str(i) + '_user')
             else:
                 with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
-                    full_response = ""
-                    full_response += msg.content.delta.get("content", "")
-                    message_placeholder.markdown(full_response + "▌")
-                    # st.write(msg.content, key=str(i) + '_ai')
+                    # message_placeholder = st.empty()
+                    # full_response = ""
+                    # full_response += msg.content.delta.get("content", "")
+                    # message_placeholder.markdown(full_response + "▌")
+                    st.write(msg.content, key=str(i) + '_ai')
                 # message(msg.content, is_user=False, key=str(i) + '_ai')
 
 
