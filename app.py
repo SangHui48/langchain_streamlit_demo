@@ -20,8 +20,8 @@ from langchain.schema import (
     AIMessage
 )
 
-from PIL import Image
-robots = Image.open('./gpt.png')
+# from PIL import Image
+# robots = Image.open('./gpt.png')
 
 # Sidebar contents
 with st.sidebar:
