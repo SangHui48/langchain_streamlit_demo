@@ -13,6 +13,8 @@ from langchain.callbacks import get_openai_callback
 
 # Sidebar contents
 with st.sidebar:
+    st.set_page_config(page_title = "This is a Multipage WebApp")
+
     st.title('🤗💬 LLM Chat App')
     st.markdown('''
     ## About
@@ -24,6 +26,7 @@ with st.sidebar:
     ''')
     add_vertical_space(5)
     st.write('Made with ❤️ by [Prompt Engineer](https://youtube.com/@engineerprompt)')
+    
 
 def main():
     st.header("Chat with PDF 💬")
