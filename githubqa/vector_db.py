@@ -2,18 +2,25 @@ import os
 import pinecone
 from langchain.vectorstores import Pinecone, DeepLake
 from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()
+# load_dotenv()
+PINECONE_API_KEY = st.secrets['PINECONE_API_KEY']
+PINECONE_ENV = st.secrets['PINECONE_ENV']
+PINECONE_INDEX_NAME = st.secrets['PINECONE_INDEX_NAME']
+DEEPLAKE_USERNAME = st.secrets['DEEPLAKE_USERNAME']
+ACTIVELOOP_FILE_NAME = st.secrets['ACTIVELOOP_FILE_NAME']
 
 # pinecone db 임베딩 후 리턴
+# @st.cache_data()
 def db_from_pinecone(docs, embeddings):
     
     # initialize pinecone
     pinecone.init(
-        api_key= os.getenv("PINECONE_API_KEY"),
-        environment= os.getenv("PINECONE_ENV")  
+        api_key= PINECONE_API_KEY,
+        environment= PINECONE_ENV  
     )
-    index_name = os.getenv("PINECONE_INDEX_NAME") 
+    index_name = PINECONE_INDEX_NAME
     
     # pinecone vector 삭제
     index = pinecone.Index(index_name)
@@ -24,8 +31,8 @@ def db_from_pinecone(docs, embeddings):
 
 def db_from_deeplake(docs, embeddings):
     # get it from https://app.activeloop.ai/
-    user_name = os.getenv("DEEPLAKE_USERNAME")
-    file_name = os.getenv("ACTIVELOOP_FILE_NAME")
+    user_name = DEEPLAKE_USERNAME
+    file_name = ACTIVELOOP_FILE_NAME
     db = DeepLake.from_documents(
         docs, embeddings, dataset_path=f'hub://{user_name}/{file_name}'
     )
@@ -37,6 +44,7 @@ def db_from_deeplake(docs, embeddings):
     )
     return db
 
+# @st.cache_data()
 def mmr_retriever_setting(vectorstore, fetch_num, k_num):
     retriever = vectorstore.as_retriever(search_type="mmr")
     retriever.search_kwargs["distance_metric"] = "cos"
