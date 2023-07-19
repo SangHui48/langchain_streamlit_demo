@@ -31,51 +31,43 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    if "db" not in st.session_state:
-        st.session_state.db = True
-
     if github_link:
         with st.spinner('레포지터리 분석중...'):
-            # 2. 모든 데이터 "File_name" : "File_content" 형식 받아오기 
+            # 2. 모든 데이터 "File_name" : "File_content" 형식 받아오기
             github_info_dict, structure_content = github_api_call(github_link)
 
         # 3. "File_content 형식 데이터" 청킹 갯수 단위로 자른후에 리스트로 변환하기
         # 반환값 [Doc1, Doc2 ...]
-        if st.session_state.db:
-            with st.spinner('결과 임베딩 및 데이터베이스화 중'):
-                global docs, embedding_model, vector_db, retriever
-                docs = dictionary_to_docs(
-                    github_info_dict, structure_content,
-                    chunking_size=1000, overlap_size=0, 
-                    model_name=MODEL_NAME
-                )
-                # 4. chunking 된 데이터 vector db 로 임베딩 하기 
-                # 임베딩 모델 및 vector db 반환 
-                embedding_model = OpenAIEmbeddings(model='text-embedding-ada-002')
-                # vector_db = db_from_deeplake(docs, embedding_model)
-                vector_db = db_from_pinecone(docs, embedding_model)
-                
-                # 5. QA 를 위한 retriever 및 qa 세팅 하기
-                retriever =  mmr_retriever_setting(
-                    vectorstore=vector_db, 
-                    fetch_num=10, k_num=100
-                )
-
-            open_ai_model =  ChatOpenAI(model_name=MODEL_NAME)
-            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-            global qa_chain
-            qa_chain = ConversationalRetrievalChain.from_llm(
-                llm=open_ai_model,
-                memory=memory,
-                retriever=retriever,
-                get_chat_history=lambda h : h,
+        with st.spinner('임베딩중...'):
+            docs = dictionary_to_docs(
+                github_info_dict, structure_content,
+                chunking_size=1000, overlap_size=0, 
+                model_name=MODEL_NAME
             )
-            st.session_state.db = False
+            # 4. chunking 된 데이터 vector db 로 임베딩 하기 
+            # 임베딩 모델 및 vector db 반환 
+            embedding_model = OpenAIEmbeddings(model='text-embedding-ada-002')
+            # vector_db = db_from_deeplake(docs, embedding_model)
+            vector_db = db_from_pinecone(docs, embedding_model)
+            
+            # 5. QA 를 위한 retriever 및 qa 세팅 하기
+            retriever =  mmr_retriever_setting(
+                vectorstore=vector_db, 
+                fetch_num=10, k_num=100
+            )
+        open_ai_model =  ChatOpenAI(model_name=MODEL_NAME)
+        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+        qa_chain = ConversationalRetrievalChain.from_llm(
+            llm=open_ai_model,
+            memory=memory,
+            retriever=retriever,
+            get_chat_history=lambda h : h,
+        )
         #QA 시작
         query = st.chat_input("Your message: ", key="user_input")
         if query:
             st.session_state.messages.append(query)
-            with st.spinner("Thinking..."):
+            with st.spinner("답변 생성중..."):
                 response = qa_chain({"question": query})
                 st.session_state.messages.append(response["answer"])
                     
