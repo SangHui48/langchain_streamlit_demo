@@ -1,6 +1,18 @@
+import os
+import pickle
+import openai
 import streamlit as st
+from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from streamlit_extras.add_vertical_space import add_vertical_space
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.llms import OpenAI
+from langchain.chains.question_answering import load_qa_chain
+from langchain.callbacks import get_openai_callback
+from streamlit_chat import message
+
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import (
     SystemMessage,
@@ -8,28 +20,72 @@ from langchain.schema import (
     AIMessage
 )
 
-from githubqa.get_info_from_api import github_api_call
+# from PIL import Image
+# robots = Image.open('./gpt.png')
 
 # Sidebar contents
 with st.sidebar:
     st.set_page_config(page_title = "This is a Multipage WebApp")
     st.title('🤗💬 LLM Chat App')
+    # st.markdown('''
+    # ## About
+    # This app is an LLM-powered chatbot built using:
+    # - [Streamlit](https://streamlit.io/)
+    # - [LangChain](https://python.langchain.com/)
+    # - [OpenAI](https://platform.openai.com/docs/models) LLM model
+ 
+    # ''')
     add_vertical_space(5)
     st.write('Made with  by [오미자차](https://github.com/SangHui48/KDT_AI_B3)')
     
 
 def main():
-    load_dotenv()
+    # styl = f"""
+    # <style>
+    #     .stTextInput {{
+    #     position: fixed;
+    #     bottom: 3rem;
+    #     }}
+    # </style>
+    # """
+    # st.markdown(styl, unsafe_allow_html=True)
     st.header("Gitter:feather: ")
+    load_dotenv()
 
-    # user input github repo url
-    github_link = st.text_input("Github repository github_link을 입력해주세요")
+    # upload a PDF file
+    url = st.text_input("Github repository url을 입력해주세요")
 
-    if github_link is not None:
-        # 2. 모든 데이터 "File_name" : "File_content" 형식 받아오기 
-        github_info_dict, structure_content = github_api_call(github_link)
-        st.write(github_info_dict)
-        st.write(structure_content)
+    if url is not None:
+        # pdf_reader = PdfReader(pdf)
+
+        # text = ""
+        # for page in pdf_reader.pages:
+        #     text += page.extract_text()
+        
+        # text_splitter = RecursiveCharacterTextSplitter(
+        #     chunk_size=1000,
+        #     chunk_overlap=200,
+        #     length_function=len
+        # )
+
+        # chunks = text_splitter.split_text(text=text)
+        
+        # # Embeddings
+        # store_name = pdf.name[:-4]
+        # st.write(f'{store_name}')
+
+        # if os.path.exists(f"{store_name}.pkl"):
+        #     with open(f"{store_name}.pkl", "rb") as f:
+        #         VectorStore = pickle.load(f)
+        #     st.write("Embeddings Loaded from the Disk")
+        # else:
+        #     embeddings = OpenAIEmbeddings()
+        #     VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
+        #     with open(f"{store_name}.pkl", "wb") as f:
+        #         pickle.dump(VectorStore, f)
+            
+        #     st.write('Embeddings Computation Completed')
+
         # Accept user questions/query
         chat = ChatOpenAI(temperature=0)
         if "messages" not in st.session_state:
