@@ -11,6 +11,8 @@ import streamlit as st
 API_CALL_COUNT = 0
 TOTAL_INFO_DICT = {}
 STRUCTURE_CONTENT = ''
+GITHUB_NAME = st.secrets['GITHUB_NAME']
+GITHUB_TOKEN = st.secrets['GITHUB_TOKEN']
 
 # .env 파일 로드
 load_dotenv()
@@ -23,7 +25,7 @@ def api_call(api_link):
 
     response = requests.get(
         api_link,
-        auth=( os.getenv("GITHUB_NAME") , os.getenv("GITHUB_TOKEN"))
+        auth=( GITHUB_NAME , GITHUB_TOKEN)
     )
 
     if response.status_code == 200:
