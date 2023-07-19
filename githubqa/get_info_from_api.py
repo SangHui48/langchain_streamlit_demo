@@ -3,6 +3,7 @@ import time
 import json
 import base64
 import requests
+import streamlit as st
 from dotenv import load_dotenv
 from anytree import Node, RenderTree 
 from langchain.document_loaders import PyPDFLoader
@@ -72,6 +73,7 @@ def get_dir_info(api_link, file_name="Git_Repository", parent_node=ROOT):
             get_dir_info(file_api_link, file_name, dir_node)
 
 
+@st.cache_data
 def github_api_call(web_link):
     start_time = time.time()
     user_name, repo_name = web_link.split('/')[-2:]
