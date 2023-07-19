@@ -1,12 +1,11 @@
 import streamlit as st
-from dotenv import load_dotenv
-from streamlit_extras.add_vertical_space import add_vertical_space
-from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationalRetrievalChain
-from githubqa.data_processing import dictionary_to_docs
 from githubqa.get_info_from_api import github_api_call
+from githubqa.data_processing import dictionary_to_docs
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.chains import ConversationalRetrievalChain
+from streamlit_extras.add_vertical_space import add_vertical_space
 from githubqa.vector_db import (
     db_from_pinecone, db_from_deeplake, mmr_retriever_setting
 )
@@ -20,7 +19,6 @@ with st.sidebar:
     
 
 def main():
-    load_dotenv()
     MODEL_NAME = "gpt-3.5-turbo-16k" # langchain llm config
 
     st.header("Gitter:feather: ")

@@ -17,7 +17,7 @@ def api_call(api_link):
 
     response = requests.get(
         api_link,
-        auth=( st.secrets["GITHUB_NAME"] , st.secrets["GITHUB_TOKEN"])
+        auth=(st.secrets["GITHUB_NAME"], st.secrets["GITHUB_TOKEN"])
     )
 
     if response.status_code == 200:
