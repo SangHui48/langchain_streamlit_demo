@@ -2,10 +2,12 @@ import os
 import pinecone
 from langchain.vectorstores import Pinecone, DeepLake
 from dotenv import load_dotenv
+import streamlit as st
 
 load_dotenv()
 
 # pinecone db 임베딩 후 리턴
+# @st.cache_data()
 def db_from_pinecone(docs, embeddings):
     
     # initialize pinecone
@@ -37,6 +39,7 @@ def db_from_deeplake(docs, embeddings):
     )
     return db
 
+# @st.cache_data()
 def mmr_retriever_setting(vectorstore, fetch_num, k_num):
     retriever = vectorstore.as_retriever(search_type="mmr")
     retriever.search_kwargs["distance_metric"] = "cos"

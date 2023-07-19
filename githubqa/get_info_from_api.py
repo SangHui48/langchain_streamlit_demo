@@ -6,6 +6,7 @@ import requests
 from dotenv import load_dotenv
 from anytree import Node, RenderTree 
 from langchain.document_loaders import PyPDFLoader
+import streamlit as st
 
 API_CALL_COUNT = 0
 TOTAL_INFO_DICT = {}
@@ -71,7 +72,7 @@ def get_dir_info(api_link, file_name="Git_Repository", parent_node=ROOT):
             dir_node = Node(file_name, parent=parent_node)
             get_dir_info(file_api_link, file_name, dir_node)
 
-
+@st.cache_data()
 def github_api_call(web_link):
     start_time = time.time()
     user_name, repo_name = web_link.split('/')[-2:]
