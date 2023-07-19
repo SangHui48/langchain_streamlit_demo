@@ -74,7 +74,7 @@ def get_dir_info(api_link, file_name="Git_Repository", parent_node=ROOT):
 
 def github_api_call(web_link):
     start_time = time.time()
-    user_name,repo_name = web_link.split('/')[-2:]
+    user_name, repo_name = web_link.split('/')[-2:]
     get_dir_info(f"https://api.github.com/repos/{user_name}/{repo_name}/contents/")
 
     end_time = time.time()  # 실행 종료 시간 기록

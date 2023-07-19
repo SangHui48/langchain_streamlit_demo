@@ -1,6 +1,5 @@
 import os
 import pinecone
-from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone, DeepLake
 from dotenv import load_dotenv
 
