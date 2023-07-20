@@ -33,7 +33,7 @@ def main():
     if github_link:
         with st.spinner('레포지터리 분석중...'):
             # 2. 모든 데이터 "File_name" : "File_content" 형식 받아오기
-            github_info_dict, structure_content = github_api_call(github_link)
+            github_info_dict, structure_content, _ = github_api_call(github_link)
 
         # 3. "File_content 형식 데이터" 청킹 갯수 단위로 자른후에 리스트로 변환하기
         # 반환값 [Doc1, Doc2 ...]

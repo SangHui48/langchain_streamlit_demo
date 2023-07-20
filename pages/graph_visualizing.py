@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_agraph import agraph, Node, Edge, Config
 from streamlit_agraph.config import Config, ConfigBuilder
-from githubqa.get_info_from_api import github_api_call, ROOT
+from githubqa.get_info_from_api import github_api_call
 from anytree import RenderTree 
 
 # 이미지 온라인 링크 호스팅 : https://imgbb.com/ # 여기서 집어넣으면 댐
@@ -14,23 +14,28 @@ file_image_dict = {
     "ipynb": "https://i.ibb.co/nQ8yPfh/ipynb.png"
 }
 
-
-
+nodes, edges = [], []
 
 def load_graph_data(github_link):
-    global file_image_dict
-    nodes = []
-    edges = []
+    global file_image_dict, nodes, edges
     
-    _, _ = github_api_call(github_link)
-    for _, _, tmp_node in RenderTree(ROOT):
-        if tmp_node.name == "root":
+    nodes, edges = [], [] 
+    
+    _, _ ,root = github_api_call(github_link)
+
+    for _, _, tmp_node in RenderTree(root):
+        file_name = github_link.split('/')[-1]
+        # print(tmp_node.name)
+        if tmp_node.name == root.name:
             nodes.append(
                 Node(id=tmp_node.name,
-                    label=tmp_node.name,
+                    label=file_name,
+                    title=file_name,
                     shape="circularImage",
                     image="https://i.ibb.co/8MN42Hb/root.png",
                     link=github_link,
+                    # size=100, # 이런 식으로 수정하면 됨.
+                    # color="#FF0000", 
                     )
                 )
         elif "." in tmp_node.name or tmp_node.name=="LICENSE":  
@@ -45,7 +50,7 @@ def load_graph_data(github_link):
                 Node(id=tmp_node.name,
                     label=tmp_node.name,
                     shape="circularImage",
-                    image=image_link
+                    image=image_link,
                     )
                 )
         else:
@@ -66,21 +71,9 @@ def load_graph_data(github_link):
 
 visualize_github_link = st.text_input("Github repository link을 입력해주세요")
 
-nodes, edges = [], []
 if visualize_github_link:
+    nodes, edges = [], [] 
     nodes, edges = load_graph_data(visualize_github_link)
-
-config = Config(width=750,
-                height=950,
-                directed=True, 
-                physics=True, 
-                hierarchical=True,
-                # **kwargs
-                )
-
-return_value = agraph(nodes=nodes, 
-                      edges=edges, 
-                      config=config)
 
 # 1. Build the config (with sidebar to play with options) .
 config_builder = ConfigBuilder(nodes)
@@ -92,3 +85,6 @@ config.save("config.json")
 # 3. Simple reload from json file (you can bump the builder at this point.)
 config = Config(from_json="config.json")
 
+agraph(nodes=nodes, 
+        edges=edges, 
+        config=config)

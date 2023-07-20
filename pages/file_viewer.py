@@ -49,7 +49,7 @@ def get_file_type(file_name): # 현재 .py, .js만 호환
 
     return file_type
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1,4])
 
 with col1:
     user = st.text_input('GitHub User:')
