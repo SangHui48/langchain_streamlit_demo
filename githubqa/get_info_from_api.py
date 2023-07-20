@@ -8,8 +8,7 @@ from langchain.document_loaders import PyPDFLoader
 
 API_CALL_COUNT = 0
 TOTAL_INFO_DICT = {}
-STRUCTURE_CONTENT = ''
-ROOT = Node("root")
+ROOT = None
 
 def api_call(api_link):
     global API_CALL_COUNT
@@ -29,7 +28,8 @@ def api_call(api_link):
         return None
     
     
-def get_dir_info(api_link, file_name="Git_Repository", parent_node=ROOT):
+def get_dir_info(api_link, file_name, parent_node ):
+    # print(api_link, file_name, parent_node)
     file_info_list = api_call(api_link)
     for file_info in file_info_list:
         will_pass = False
@@ -66,17 +66,24 @@ def get_dir_info(api_link, file_name="Git_Repository", parent_node=ROOT):
             dir_node = Node(file_name, parent=parent_node)
             get_dir_info(file_api_link, file_name, dir_node)
 
+
 @st.cache_data()
 def github_api_call(web_link):
     global ROOT,API_CALL_COUNT,TOTAL_INFO_DICT
-    if len(ROOT.descendants) > 0:
-        ROOT = Node("root")
-        API_CALL_COUNT = 0
-        TOTAL_INFO_DICT = {}
-        
-    start_time = time.time()
+
     user_name, repo_name = web_link.split('/')[-2:]
-    get_dir_info(f"https://api.github.com/repos/{user_name}/{repo_name}/contents/")
+
+    ROOT = Node(repo_name)
+    API_CALL_COUNT = 0
+    TOTAL_INFO_DICT = {}
+
+    start_time = time.time()
+    
+    get_dir_info(
+        api_link=f"https://api.github.com/repos/{user_name}/{repo_name}/contents/",
+        file_name=repo_name,
+        parent_node=ROOT
+    )
 
     end_time = time.time()  # 실행 종료 시간 기록
     execution_time = end_time - start_time  # 실행 시간 계산
@@ -86,11 +93,11 @@ def github_api_call(web_link):
     tree_structure = ""
     for pre, _, node in RenderTree(ROOT):
         tree_structure += f"{pre}{node.name}\n"
-    
-    STRUCTURE_CONTENT = f'''
+    # print(tree_structure)
+    structure_content = f'''
     {user_name} 's github link is {repo_name} and the {repo_name}'s github folder structure is like that.
 
     {tree_structure}
     '''
     
-    return TOTAL_INFO_DICT, STRUCTURE_CONTENT
+    return TOTAL_INFO_DICT, structure_content, ROOT

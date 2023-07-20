@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from githubqa.get_info_from_api import github_api_call
@@ -32,7 +33,7 @@ def main():
     if github_link:
         with st.spinner('레포지터리 분석중...'):
             # 2. 모든 데이터 "File_name" : "File_content" 형식 받아오기
-            github_info_dict, structure_content = github_api_call(github_link)
+            github_info_dict, structure_content, _ = github_api_call(github_link)
 
         # 3. "File_content 형식 데이터" 청킹 갯수 단위로 자른후에 리스트로 변환하기
         # 반환값 [Doc1, Doc2 ...]
@@ -53,30 +54,62 @@ def main():
                 vectorstore=vector_db, 
                 fetch_num=10, k_num=100
             )
-        open_ai_model =  ChatOpenAI(model_name=MODEL_NAME)
-        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-        qa_chain = ConversationalRetrievalChain.from_llm(
-            llm=open_ai_model,
-            memory=memory,
-            retriever=retriever,
-            get_chat_history=lambda h : h,
-        )
+            open_ai_model =  ChatOpenAI(model_name=MODEL_NAME)
+            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+            qa_chain = ConversationalRetrievalChain.from_llm(
+                llm=open_ai_model,
+                memory=memory,
+                retriever=retriever,
+                get_chat_history=lambda h : h,
+            )
         #QA 시작
-        query = st.chat_input("Your message: ", key="user_input")
-        if query:
-            st.session_state.messages.append(query)
-            with st.spinner("답변 생성중..."):
-                response = qa_chain({"question": query})
-                st.session_state.messages.append(response["answer"])
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+        if prompt := st.chat_input("Ask questions about the GitHub repository!"):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+            with st.spinner('답변 생성중...'):
+                with st.chat_message("assistant"):
+                    message_placeholder = st.empty()
+                    full_response = ""
+                    response = qa_chain({"question": prompt}) # QA chain
+                    for response in response['answer']:
+                        full_response += response
+                        time.sleep(0.02)
+                        message_placeholder.markdown(full_response + "▌")
+                    message_placeholder.markdown(full_response)
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
+        
+        # query = st.chat_input("Your message: ", key="user_input")
+        # if query:
+        #     st.session_state.messages.append(query)
+        #     with st.spinner("답변 생성중..."):
+        #         response = qa_chain({"question": query})
+        #         st.session_state.messages.append(response["answer"])
                     
-            messages = st.session_state.get('messages', [])
-            for i, msg in enumerate(messages):
-                if i % 2 == 0:
-                    with st.chat_message("user"):
-                        st.write(msg, key=str(i) + '_user')
-                else:
-                    with st.chat_message("assistant"):
-                        st.write(msg, key=str(i) + '_ai')
+        #     messages = st.session_state.get('messages', [])
+        #     for i, msg in enumerate(messages):
+        #         if i % 2 == 0:
+        #             with st.chat_message("user"):
+        #                 st.write(msg, key=str(i) + '_user')
+        #         else:
+        #             with st.chat_message("assistant"):
+        #                 # st.write(msg, key=str(i) + '_ai')
+
+        #                 # Answer UI
+        #                 # import time
+        #                 message_placeholder = st.empty()
+        #                 full_response = ""
+        #                 # Simulate stream of response with milliseconds delay
+        #                 for chunk in msg.split():
+        #                     full_response += chunk
+        #                     # time.sleep(0.05)  
+        #                     # Add a blinking cursor to simulate typing
+        #                     message_placeholder.markdown(full_response + "▌")
+        #                 message_placeholder.markdown(full_response)
 
 if __name__ == '__main__':
     main()
