@@ -28,6 +28,8 @@ def load_graph_data(github_link):
                     shape="circularImage",
                     image="https://i.ibb.co/8MN42Hb/root.png",
                     link=github_link,
+                    # size=100, # 이런 식으로 수정하면 됨.
+                    # color="#FF0000", 
                     )
                 )
         elif "." in tmp_node.name or tmp_node.name=="LICENSE":  
@@ -42,7 +44,7 @@ def load_graph_data(github_link):
                 Node(id=tmp_node.name,
                     label=tmp_node.name,
                     shape="circularImage",
-                    image=image_link
+                    image=image_link,
                     )
                 )
         else:
