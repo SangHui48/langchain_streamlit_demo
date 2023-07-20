@@ -162,3 +162,5 @@ cython_debug/
 .env
 *.toml
 data
+not_used/*
+config.json
