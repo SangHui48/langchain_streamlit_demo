@@ -14,9 +14,6 @@ file_image_dict = {
     "ipynb": "https://i.ibb.co/nQ8yPfh/ipynb.png"
 }
 
-
-
-
 def load_graph_data(github_link):
     global file_image_dict
     nodes = []
@@ -70,18 +67,6 @@ nodes, edges = [], []
 if visualize_github_link:
     nodes, edges = load_graph_data(visualize_github_link)
 
-config = Config(width=750,
-                height=950,
-                directed=True, 
-                physics=True, 
-                hierarchical=True,
-                # **kwargs
-                )
-
-return_value = agraph(nodes=nodes, 
-                      edges=edges, 
-                      config=config)
-
 # 1. Build the config (with sidebar to play with options) .
 config_builder = ConfigBuilder(nodes)
 config = config_builder.build()
@@ -92,3 +77,6 @@ config.save("config.json")
 # 3. Simple reload from json file (you can bump the builder at this point.)
 config = Config(from_json="config.json")
 
+agraph(nodes=nodes, 
+        edges=edges, 
+        config=config)
