@@ -78,7 +78,19 @@ def main():
                         st.write(msg, key=str(i) + '_user')
                 else:
                     with st.chat_message("assistant"):
-                        st.write(msg, key=str(i) + '_ai')
+                        # st.write(msg, key=str(i) + '_ai')
+
+                        # Answer UI
+                        import time
+                        message_placeholder = st.empty()
+                        full_response = ""
+                        # Simulate stream of response with milliseconds delay
+                        for chunk in msg.split():
+                            full_response += chunk + " "
+                            time.sleep(0.05)
+                            # Add a blinking cursor to simulate typing
+                            message_placeholder.markdown(full_response + "▌")
+                        message_placeholder.markdown(full_response)
 
 if __name__ == '__main__':
     main()
