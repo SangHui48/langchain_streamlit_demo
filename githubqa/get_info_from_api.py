@@ -1,22 +1,14 @@
-import os
 import time
 import json
 import base64
 import requests
-from dotenv import load_dotenv
-from anytree import Node, RenderTree 
-from langchain.document_loaders import PyPDFLoader
 import streamlit as st
+from anytree import Node, RenderTree
+from langchain.document_loaders import PyPDFLoader
 
 API_CALL_COUNT = 0
 TOTAL_INFO_DICT = {}
 STRUCTURE_CONTENT = ''
-GITHUB_NAME = st.secrets['GITHUB_NAME']
-GITHUB_TOKEN = st.secrets['GITHUB_TOKEN']
-
-# .env 파일 로드
-load_dotenv()
-
 ROOT = Node("root")
 
 def api_call(api_link):
@@ -25,7 +17,7 @@ def api_call(api_link):
 
     response = requests.get(
         api_link,
-        auth=( GITHUB_NAME , GITHUB_TOKEN)
+        auth=(st.secrets["GITHUB_NAME"], st.secrets["GITHUB_TOKEN"])
     )
 
     if response.status_code == 200:
@@ -76,6 +68,12 @@ def get_dir_info(api_link, file_name="Git_Repository", parent_node=ROOT):
 
 @st.cache_data()
 def github_api_call(web_link):
+    global ROOT,API_CALL_COUNT,TOTAL_INFO_DICT
+    if len(ROOT.descendants) > 0:
+        ROOT = Node("root")
+        API_CALL_COUNT = 0
+        TOTAL_INFO_DICT = {}
+        
     start_time = time.time()
     user_name, repo_name = web_link.split('/')[-2:]
     get_dir_info(f"https://api.github.com/repos/{user_name}/{repo_name}/contents/")

@@ -5,10 +5,10 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from streamlit_extras.add_vertical_space import add_vertical_space
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.llms import OpenAI
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
+# from langchain.embeddings.openai import OpenAIEmbeddings
+# from langchain.vectorstores import FAISS
+# from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.callbacks import get_openai_callback
 from streamlit_chat import message
