@@ -6,6 +6,8 @@ import base64
 
 load_dotenv()
 
+st.set_page_config(layout="wide")
+
 @st.cache_data()
 def get_github_content(user, repo, path=''):
     url = f'https://api.github.com/repos/{user}/{repo}/contents/{path}'
