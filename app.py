@@ -22,7 +22,7 @@ with st.sidebar:
 def main():
     MODEL_NAME = "gpt-3.5-turbo-16k" # langchain llm config
 
-    st.header("Gitter:feather: ")
+    st.header("Gitter :feather:")
 
     # user input github repo url
     github_link = st.text_input("Github repository link을 입력해주세요")
