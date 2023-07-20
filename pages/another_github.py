@@ -9,41 +9,51 @@ load_dotenv()
 @st.cache_data()
 def get_github_content(user, repo, path=''):
     url = f'https://api.github.com/repos/{user}/{repo}/contents/{path}'
-    response = requests.get(url, auth=("GITHUB_NAME","GITHUB_TOKEN"))
+    response = requests.get(url, auth=(os.getenv("GITHUB_NAME"),os.getenv("GITHUB_TOKEN")))
     return response.json()
 
 def print_directory_structure(user, repo, path='', depth=0):
     contents = get_github_content(user, repo, path)
 
-    if type(contents) == "list":
-        if "message" in contents[0].keys(): # Still testing
-            if contents["message"].startswith("API rate limit exceeded for"):
-                print("ERROR: API rate limit exceeded!")
-                st.write("ERROR: API rate limit exceeded!")
+    # GitHub API 제한 핸들링
+    try:
+        if contents["message"].startswith("API rate limit exceeded for"):
+            print("ERROR: API rate limit exceeded!")
+            st.write("ERROR: API rate limit exceeded!")
+    except:
+        pass # 핸들링 안하는 중
 
     for item in contents:
         if item['type'] == 'dir':
-            st.write("-"*(depth+1) + f'Directory: {item["path"]}')
             print_directory_structure(user, repo, item['path'], depth+1)
         else:
-            #st.write("- "*(depth+1) + " "*bool(depth) + f' File: {item["path"]}')
-            st.write(f'File: {item["path"]}') #"<a href='#' id='my-link'>Click me</a>"
-            #if st.button("my-link"):
-            #    st.write("Link clicked!")
-            print_content(item["_links"]['self'])
+            if st.button(item['path']):
+                print_content(item['_links']['self'], get_file_type(item['path']))
             
-def print_content(url):
-    response = requests.get(url, auth=("GITHUB_NAME","GITHUB_TOKEN")).json()
+def print_content(url, file_type):
+    response = requests.get(url, auth=(os.getenv("GITHUB_NAME"),os.getenv("GITHUB_TOKEN"))).json()
     content = base64.b64decode(response['content']).decode()
-    # content = content[2:-1].replace('\\n', '\n')
     with col2:
-        st.code(content, language='python', line_numbers=True)
+        st.code(content, language=file_type, line_numbers=True)
+
+def get_file_type(file_name): # 현재 .py, .js만 호환
+    # https://github.com/react-syntax-highlighter/react-syntax-highlighter/blob/master/AVAILABLE_LANGUAGES_PRISM.MD
+    if file_name.endswith(".md"):
+        file_type = "markdown"
+    elif file_name.endswith(".py"):
+        file_type = "python"
+    elif file_name.endswith(".js"):
+        file_type = "javascript"
+    else:
+        file_type = None
+
+    return file_type
 
 col1, col2 = st.columns(2)
 
 with col1:
-    user = st.text_input('GitHub User:', 'SamLynnEvans')
-    repo = st.text_input('GitHub Repo:', 'Transformer')
+    user = st.text_input('GitHub User:')
+    repo = st.text_input('GitHub Repo:')
 
     if user and repo:
         print_directory_structure(user, repo)
